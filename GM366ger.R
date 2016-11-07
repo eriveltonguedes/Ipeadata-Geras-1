@@ -53,6 +53,7 @@ r<-NULL
 for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==0){r<-c(r,i)}}
 if (length(r)>0){GENERICA<-GENERICA[r[length(r)]:dim(GENERICA)[1],]}
 GENERICA <- na.exclude(GENERICA)
+GENERICA[,2] <- round(GENERICA[,2],5)
 ## 6) SALVANDO EM .XLS
 write.xlsx(GENERICA,paste0("GM366ger.xls"),sheetName="Generica",row.names=F,showNA=F)
 #######################
