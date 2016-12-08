@@ -26,27 +26,34 @@ for (i in 1:length(pacotes))
   if (length(names(installed.packages()[,1])[names(installed.packages()[,1])==pacotes[i]])==0){install.packages(pacotes[i], repos="http://cran.fiocruz.br/")}
   library(pacotes[i],character.only = TRUE) 
 }
+
 ## 1) AJUSTES DOS PARAMETROS
 options(scipen=999)
 setwd("//Srjn3/Area_Corporativa/Projeto_IPEADATA/Temporario/geras")
+
 ## 2) CARREGANDO AS SERIES INPUT E DEFININDO AS SERIES OUTPUT
 seroutput<-c("IGP12_IGPF12")
 serinput<-c("IGP12_IGPDI12")
+
 ## 3) CARREGANDO A SERIE
 serie<-sqlQuery((odbcConnect("ipeadata",uid="",pwd="")),(paste0("SELECT ipea.vw_Valor.SERCODIGO, CAST (ipea.vw_Valor.VALDATA as NUMERIC) as VALDATA, ipea.vw_Valor.VALVALOR FROM ipea.vw_Valor WHERE (((ipea.vw_Valor.SERCODIGO)='",serinput,"' and ipea.vw_Valor.VALVALOR IS NOT NULL)) order by VALDATA;")))
 odbcCloseAll()
 serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
+
 ## 4) BLOCO DE OPERACOES MATEMATICAS
 GERADO<-data.frame(NULL)
 for (i in 2:(dim(serie)[1])){GERADO[(i-1),1]<-sqrt(serie[i,3]*serie[(i-1),3])}
+
 ## 5) COLOCANDO NO FORMATO NOVO (PLANILHA GENERICA)
 GENERICA<-data.frame(serie[-dim(serie)[1],2],GERADO)
 names(GENERICA)<-c("VALDATA",seroutput)
 r<-NULL
 for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==0){r<-c(r,i)}}
 if (length(r)>0){GENERICA<-GENERICA[r[length(r)]:dim(GENERICA)[1],]}
+
 ## 6) SALVANDO EM .XLS
 write.xlsx(GENERICA,paste0("IGP12ger.xls"),sheetName="Generica",row.names=F,showNA=F)
+
 #######################
 # ## 7) VERIFICACAO COM A SERIE NO BANCO
 # for(i in 1:length(seroutput))
