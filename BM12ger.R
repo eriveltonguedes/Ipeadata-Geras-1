@@ -31,9 +31,11 @@ for (i in 1:length(pacotes))
   if (length(names(installed.packages()[,1])[names(installed.packages()[,1])==pacotes[i]])==0){install.packages(pacotes[i], repos="http://cran.fiocruz.br/")}
   library(pacotes[i],character.only = TRUE) 
 }
+
 ## 1) AJUSTES DOS PARAMETROS
 options(scipen=999)
 setwd("//Srjn3/Area_Corporativa/Projeto_IPEADATA/Temporario/geras")
+
 ## 2) CARREGANDO AS SERIES INPUT E DEFININDO AS SERIES OUTPUT
 seroutput<-c("BM12_XCCM12",
              "BM12_MCCM12",
@@ -48,16 +50,19 @@ for(i in 1:length(serinput))
   assign(nomes,sqlQuery((odbcConnect("ipeadata",uid="",pwd="")),(paste0("SELECT ipea.vw_Valor.SERCODIGO, CAST (ipea.vw_Valor.VALDATA as NUMERIC) as VALDATA, ipea.vw_Valor.VALVALOR FROM ipea.vw_Valor WHERE (((ipea.vw_Valor.SERCODIGO)='",serinput[i],"' and ipea.vw_Valor.VALVALOR IS NOT NULL)) order by VALDATA;"))))
   odbcCloseAll()
 }
+
 ## 3) FUNDINDO AS SERIES EM UM UNICO BLOCO DE DADOS
 serie<-na.exclude(merge(serie1,serie2,by="VALDATA",all=T))
 serie<-na.exclude(merge(serie,serie3,by="VALDATA",all=T))
 serie<-na.exclude(merge(serie,serie4,by="VALDATA",all=T,suffixes = c(".z",".w")))
 serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
+
 ## 4) BLOCO DE OPERACOES MATEMATICAS
 GERADO<-data.frame(NULL)
 for (i in 1:(dim(serie)[1])){GERADO[i,1]<-serie[i,5]/serie[i,3]}
 for (i in 1:(dim(serie)[1])){GERADO[i,2]<-serie[i,7]/serie[i,3]}
 for (i in 1:(dim(serie)[1])){GERADO[i,3]<-serie[i,9]/serie[i,3]}
+
 ## 5) COLOCANDO NO FORMATO NOVO (PLANILHA GENERICA)
 GENERICA<-data.frame(serie[,1],GERADO)
 names(GENERICA)<-c("VALDATA",seroutput)
@@ -66,9 +71,11 @@ for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==(dim(GENERICA)[2]-1)
 if (length(r)>0){GENERICA<-GENERICA[-r,]}
 r<-NULL
 for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==0){r<-c(r,i)}}
-if (length(r)>0){GENERICA<-GENERICA[r[length(r)]:dim(GENERICA)[1],]}
+if (length(r)>0){GENERICA<-GENERICA[r[length(r)-4]:dim(GENERICA)[1],]}
+
 ## 6) SALVANDO EM .XLS
 write.xlsx(GENERICA,paste0("BM12ger.xls"),sheetName="Generica",row.names=F,showNA=F)
+
 #######################
 # ## 7) VERIFICACAO COM A SERIE NO BANCO
 # for(i in 1:length(seroutput))
