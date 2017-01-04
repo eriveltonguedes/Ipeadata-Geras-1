@@ -13,10 +13,10 @@
 #  ANPger.INP     
 ##############################                   
 # INPUT:             
-#  ANP12_CALCO12
+#  ANP12_CALCO12, ANP12_CODP12
 ##############################                   
 # OUTPUT:          
-#  ANP_CALCO
+#  ANP_CALCO, ANP_PRALCO
 ##############################
 
 ## 0) IMPORTANDO PACOTES NECESSARIOS
@@ -32,8 +32,8 @@ options(scipen=999)
 setwd("//Srjn3/Area_Corporativa/Projeto_IPEADATA/Temporario/geras")
 
 ## 2) CARREGANDO AS SERIES INPUT E DEFININDO AS SERIES OUTPUT
-seroutput <- c("ANP_CALCO")
-serinput <- c("ANP12_CALCO12")
+serinput <- c("ANP12_CALCO12","ANP12_CODP12")
+seroutput <- c("ANP_CALCO","ANP_PRALCO")
 
 for(i in 1:length(serinput))
 { 
