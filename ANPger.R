@@ -8,6 +8,11 @@
 ##############################################################################
 ##############################################################################
 
+# esta rotina calcula a média de valores de uma série mensal e cria uma série anual correspondente
+# são considerados todos os valores, mesmo com ano incompleto
+# para acrescentar novo par de séries basta incluir em serinput e serioutput
+# CUIDADO: testasr os resultados antes de aplicar
+
 ##############################
 # GERA:                         
 #  ANPger.INP     
