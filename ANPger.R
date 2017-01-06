@@ -21,6 +21,15 @@
 #  ANP_CODP
 ##############################
 
+###############################################################################
+# DESCRIÇÃO BREVE: 
+# - Esta rotina calcula a média de valores de uma
+#   série mensal e cria uma série anual correspondente.
+# - São considerados todos os valores, mesmo com ano incompleto.
+# - Para acrescentar novo par de séries basta incluir em serinput e seroutput
+# - CUIDADO: testar os resultados antes de aplicar
+###############################################################################
+
 ## 0) IMPORTANDO PACOTES NECESSARIOS
 pacotes<-c("RODBC","rJava","xlsxjars","xlsx")
 for (i in 1:length(pacotes))
@@ -51,7 +60,6 @@ if ((length(serinput)>1) & (length(serinput)<=2)){serie <- merge(serie1,serie2,b
 if (length(serinput)>2)
 {
   serie <- merge(serie1,serie2,by="VALDATA",all=T)
-  #names(serie) <- c("VALDATA", rep(c("SERCODIGO","VALVALOR"),2)
   for (i in 3:length(serinput))
   {
     serie <- merge(serie,get(paste0("serie",i)),by="VALDATA",all=T)
@@ -65,15 +73,12 @@ serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
 # "Se os dados iniciam apos o mes 01, nao fica caracterizado um ano completo." # 
 k <- 0
 if ((as.POSIXlt(serie[1,1])$mon+1)!=1) {k<-1}
-# # "Ao carregar o 12o mes, a serie anual e automaticamente gerada." #
-# h<-0
-# if ((as.POSIXlt(serie[dim(serie)[1],1])$mon+1==12)) {h<-1}
-h <- 1
 datas<-seq(as.Date(paste0((as.POSIXlt(serie[1,1])$year+1900+k),"-01-01")),
-           as.Date(paste0((as.POSIXlt(serie[dim(serie)[1],1])$year+1900+h),"-01-01")),
+           as.Date(paste0((as.POSIXlt(serie[dim(serie)[1],1])$year+1901),"-01-01")),
            by='1 year')  
 
 ## 5) BLOCO DE OPERACOES MATEMATICAS
+# "Calcula a média anual"
 GERADO<-data.frame(NULL)
 for (i in 2:length(datas)){for (j in 1:length(serinput)){GERADO[i-1,j] <- round(mean(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i])[,(3+(j-1)*2)],na.rm=T),2)}}
 
@@ -82,7 +87,9 @@ GENERICA<-data.frame(datas[-length(datas)],GERADO)
 names(GENERICA)<-c("VALDATA",seroutput)
 r<-NULL
 for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==0){r<-c(r,i)}}
-if (length(r)>0){GENERICA<-GENERICA[r[length(r)-4]:dim(GENERICA)[1],]}
+# "Permanece apenas os últimos g valores"
+g <- 5
+if (length(r)>0){GENERICA<-GENERICA[r[length(r)-(g-1)]:dim(GENERICA)[1],]}
 
 ## 7) SALVANDO EM .XLS
 write.xlsx(GENERICA,paste0("ANPger.xls"),sheetName="Generica",row.names=F,showNA=F)
@@ -95,9 +102,20 @@ write.xlsx(GENERICA,paste0("ANPger.xls"),sheetName="Generica",row.names=F,showNA
 #   assign(nomes,sqlQuery((odbcConnect("ipeadata",uid="",pwd="")),(paste0("SELECT ipea.vw_Valor.SERCODIGO, CAST (ipea.vw_Valor.VALDATA as NUMERIC) as VALDATA, ipea.vw_Valor.VALVALOR FROM ipea.vw_Valor WHERE (((ipea.vw_Valor.SERCODIGO)='",seroutput[i],"' and ipea.vw_Valor.VALVALOR IS NOT NULL)) order by VALDATA;"))))
 #   odbcCloseAll()
 # }
-# verif<-merge(verif1,verif1,by="VALDATA",all=T)
-# verif<-verif[,seq(1,dim(verif)[2],length.out=length(seroutput)+1)]
+# verif <- NULL
+# if (length(serinput)==1){verif <- merge(verif1,verif1,by="VALDATA",all=T)}
+# if ((length(serinput)>1) & (length(serinput)<=2)){verif <- merge(verif1,verif2,by="VALDATA",all=T)}
+# if (length(serinput)>2)
+# {
+#   verif <- merge(verif1,verif2,by="VALDATA",all=T)
+#   for (i in 3:length(serinput))
+#   {
+#     verif <- merge(verif,get(paste0("verif",i)),by="VALDATA",all=T)
+#     names(verif)[(2*i):((2*i)+1)] <- paste0(c("SERCODIGO.","VALVALOR."),i)
+#   }
+# }
 # verif$VALDATA<-as.Date(verif$VALDATA, origin = "1900-01-01")
+# verif <-  verif[,seq(1,dim(verif)[2],2)]
 # names(verif)<-c("VALDATA",seroutput)
 # ############ (CTRL+L)
 # head(GENERICA)
