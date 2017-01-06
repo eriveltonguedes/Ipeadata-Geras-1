@@ -81,7 +81,9 @@ for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==(dim(GENERICA)[2]-1)
 if (length(r)>0){GENERICA<-GENERICA[-r,]}
 r<-NULL
 for (i in 1:dim(GENERICA)[1]){if (sum(is.na(GENERICA[i,]))==0){r<-c(r,i)}}
-if (length(r)>0){GENERICA<-GENERICA[r[length(r)-4]:dim(GENERICA)[1],]}
+# "Permanece apenas os últimos g valores"
+g <- 5
+if (length(r)>0){GENERICA<-GENERICA[r[length(r)-(g-1)]:dim(GENERICA)[1],]}
 
 ## 6) SALVANDO EM .XLS
 write.xlsx(GENERICA,paste0("BM12ger.xls"),sheetName="Generica",row.names=F,showNA=F)
