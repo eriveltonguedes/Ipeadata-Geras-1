@@ -18,7 +18,7 @@
 ##############################                   
 # OUTPUT:          
 #  ANP_CALCO 
-#  ANP_PRALCO
+#  ANP_CODP
 ##############################
 
 ## 0) IMPORTANDO PACOTES NECESSARIOS
