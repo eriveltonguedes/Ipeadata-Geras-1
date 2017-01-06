@@ -54,9 +54,19 @@ for(i in 1:length(serinput))
 }
 
 ## 3) FUNDINDO AS SERIES EM UM UNICO BLOCO DE DADOS
-serie<-merge(serie1,serie2,by="VALDATA",all=T)
-serie<-merge(serie,serie3,by="VALDATA",all=T)
-serie<-merge(serie,serie4,by="VALDATA",all=T,suffixes = c(".z",".w"))
+serie <- NULL
+if (length(serinput)==1){serie <- merge(serie1,serie1,by="VALDATA",all=T)}
+if ((length(serinput)>1) & (length(serinput)<=2)){serie <- merge(serie1,serie2,by="VALDATA",all=T)}
+if (length(serinput)>2)
+{
+  serie <- merge(serie1,serie2,by="VALDATA",all=T)
+  #names(serie) <- c("VALDATA", rep(c("SERCODIGO","VALVALOR"),2)
+  for (i in 3:length(serinput))
+  {
+    serie <- merge(serie,get(paste0("serie",i)),by="VALDATA",all=T)
+    names(serie)[(2*i):((2*i)+1)] <- paste0(c("SERCODIGO.","VALVALOR."),i)
+  }
+}
 serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
 
 ## 4) CRIANDO VETOR DE DATAS

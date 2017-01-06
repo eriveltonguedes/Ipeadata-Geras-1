@@ -13,10 +13,12 @@
 #  ANPger.INP     
 ##############################                   
 # INPUT:             
-#  ANP12_CALCO12
+#  ANP12_CALCO12 
+#  ANP12_CODP12
 ##############################                   
 # OUTPUT:          
-#  ANP_CALCO
+#  ANP_CALCO 
+#  ANP_PRALCO
 ##############################
 
 ## 0) IMPORTANDO PACOTES NECESSARIOS
@@ -32,8 +34,8 @@ options(scipen=999)
 setwd("//Srjn3/Area_Corporativa/Projeto_IPEADATA/Temporario/geras")
 
 ## 2) CARREGANDO AS SERIES INPUT E DEFININDO AS SERIES OUTPUT
-seroutput <- c("ANP_CALCO")
-serinput <- c("ANP12_CALCO12")
+serinput <- c("ANP12_CALCO12","ANP12_CODP12")
+seroutput <- c("ANP_CALCO","ANP_CODP")
 
 for(i in 1:length(serinput))
 { 
@@ -43,8 +45,20 @@ for(i in 1:length(serinput))
 }
 
 ## 3) FUNDINDO AS SERIES EM UM UNICO BLOCO DE DADOS
-serie <- merge(serie1,serie1,by="VALDATA",all=T)
-serie$VALDATA <- as.Date(serie$VALDATA, origin = "1900-01-01")
+serie <- NULL
+if (length(serinput)==1){serie <- merge(serie1,serie1,by="VALDATA",all=T)}
+if ((length(serinput)>1) & (length(serinput)<=2)){serie <- merge(serie1,serie2,by="VALDATA",all=T)}
+if (length(serinput)>2)
+{
+  serie <- merge(serie1,serie2,by="VALDATA",all=T)
+  #names(serie) <- c("VALDATA", rep(c("SERCODIGO","VALVALOR"),2)
+  for (i in 3:length(serinput))
+  {
+    serie <- merge(serie,get(paste0("serie",i)),by="VALDATA",all=T)
+    names(serie)[(2*i):((2*i)+1)] <- paste0(c("SERCODIGO.","VALVALOR."),i)
+  }
+}
+serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
 
 ## 4) CRIANDO VETOR DE DATAS
 ## APLICADO EM CONVERSOES DE SERIES MENSAIS PARA ANUAIS ##
@@ -61,7 +75,7 @@ datas<-seq(as.Date(paste0((as.POSIXlt(serie[1,1])$year+1900+k),"-01-01")),
 
 ## 5) BLOCO DE OPERACOES MATEMATICAS
 GERADO<-data.frame(NULL)
-for (i in 2:length(datas)){GERADO[i-1,1] <- round(mean(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i])[,3],na.rm=T),2)}
+for (i in 2:length(datas)){for (j in 1:length(serinput)){GERADO[i-1,j] <- round(mean(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i])[,(3+(j-1)*2)],na.rm=T),2)}}
 
 ## 6) COLOCANDO NO FORMATO NOVO (PLANILHA GENERICA)
 GENERICA<-data.frame(datas[-length(datas)],GERADO)
@@ -92,4 +106,3 @@ write.xlsx(GENERICA,paste0("ANPger.xls"),sheetName="Generica",row.names=F,showNA
 # tail(GENERICA)
 # tail(verif)
 # #write.xlsx(verif,paste0("ANPgerVERIFICACAO ",Sys.Date(),".xls"),sheetName="Generica",row.names=F,showNA=F) 
-
