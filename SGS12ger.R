@@ -83,7 +83,6 @@ datas<-seq(as.Date(paste0((as.POSIXlt(serie[1,1])$year+1900+k),"-01-01")),
 ## 5) BLOCO DE OPERACOES MATEMATICAS
 # "Calcula a soma anual"
 GERADO<-data.frame(NULL)
-
 for (i in 2:length(datas)){for (j in 1:length(serinput)){GERADO[i-1,j] <- sum(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i])[,(3+(j-1)*2)],na.rm=F)}}
 
 ## 6) COLOCANDO NO FORMATO NOVO (PLANILHA GENERICA)

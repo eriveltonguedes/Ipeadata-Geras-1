@@ -60,7 +60,6 @@ if ((length(serinput)>1) & (length(serinput)<=2)){serie <- merge(serie1,serie2,b
 if (length(serinput)>2)
 {
   serie <- merge(serie1,serie2,by="VALDATA",all=T)
-  #names(serie) <- c("VALDATA", rep(c("SERCODIGO","VALVALOR"),2)
   for (i in 3:length(serinput))
   {
     serie <- merge(serie,get(paste0("serie",i)),by="VALDATA",all=T)
