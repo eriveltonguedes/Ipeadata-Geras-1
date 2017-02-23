@@ -69,11 +69,11 @@ if (length(serinput)>2)
 serie$VALDATA<-as.Date(serie$VALDATA, origin = "1900-01-01")
 
 ## 4) CRIANDO VETOR DE DATAS
-## APLICADO EM CONVERS?ES DE S?RIES MENSAIS PARA ANUAIS ##
+## APLICADO EM CONVERSÕES DE SÉRIES MENSAIS PARA ANUAIS ##
 # "Se os dados iniciam apos o mes 01, nao fica caracterizado um ano completo." # 
 k<-0
 if ((as.POSIXlt(serie[1,1])$mon+1)!=1) {k<-1}
-# "Ao carregar o 12o mes, a serie anual e automaticamente gerada." #
+# "Ao carregar o 12o mês, a serie anual e automaticamente gerada." #
 h<-0
 if ((as.POSIXlt(serie[dim(serie)[1],1])$mon+1==12)) {h<-1}
 datas<-seq(as.Date(paste0((as.POSIXlt(serie[1,1])$year+1900+k),"-01-01")),

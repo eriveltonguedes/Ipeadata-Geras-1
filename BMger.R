@@ -13,19 +13,31 @@
 #  BMger.INP     
 ##############################                   
 # INPUT:             
-#  BM12_RESLIQ12
-#  BM12_LFTFBC12
-#  BM12_LTNFBC12
-#  BM12_M0N12
-#  BM12_M1N12  
+# BM12_RESLIQ12
+# BM12_RESCX12
+# BM12_LFTFBC12
+# BM12_LTNFBC12
+# BM12_M0N12
+# BM12_M1N12
 ##############################                   
 # OUTPUT:          
-#  BM_RES
-#  BM_LFTPP
-#  BM_LTNPP
-#  BM_M0FN
-#  BM_M1FN 
+# BM_RESLIQ
+# BM_RESCX
+# BM_LFTPP
+# BM_LTNPP
+# BM_M0FN
+# BM_M1FN
 ##############################
+
+###############################################################################
+# DESCRIÇÃO BREVE: 
+# - Esta rotina calcula o valor do fim de período da
+#   série mensal e cria uma série anual correspondente.
+# - NÃO são considerados todos os valores, 
+#   portanto o ano só será atualizado quando o 12o mês também o for.
+# - Para acrescentar novo par de séries NÃO basta incluir em serinput e seroutput
+# - CUIDADO: testar os resultados antes de aplicar
+###############################################################################
 
 ## 0) IMPORTANDO PACOTES NECESSARIOS
 pacotes<-c("RODBC","rJava","xlsxjars","xlsx")
@@ -40,16 +52,20 @@ options(scipen=999)
 setwd("//Srjn3/Area_Corporativa/Projeto_IPEADATA/Temporario/geras")
 
 ## 2) CARREGANDO AS SERIES INPUT E DEFININDO AS SERIES OUTPUT
-seroutput<-c("BM_RES",
-             "BM_LFTPP",
-             "BM_LTNPP",
-             "BM_M0FN",
-             "BM_M1FN")
 serinput<-c("BM12_RESLIQ12",
+            "BM12_RESCX12",
             "BM12_LFTFBC12",
             "BM12_LTNFBC12",
             "BM12_M0N12",
             "BM12_M1N12")
+
+seroutput<-c("BM_RESLIQ",
+             "BM_RESCX",
+             "BM_LFTPP",
+             "BM_LTNPP",
+             "BM_M0FN",
+             "BM_M1FN")
+
 for(i in 1:length(serinput))
 { 
   nomes <- paste0("serie", i)
@@ -64,7 +80,6 @@ if ((length(serinput)>1) & (length(serinput)<=2)){serie <- merge(serie1,serie2,b
 if (length(serinput)>2)
 {
   serie <- merge(serie1,serie2,by="VALDATA",all=T)
-  #names(serie) <- c("VALDATA", rep(c("SERCODIGO","VALVALOR"),2)
   for (i in 3:length(serinput))
   {
     serie <- merge(serie,get(paste0("serie",i)),by="VALDATA",all=T)
@@ -91,9 +106,10 @@ for (i in 2:length(datas))
 {
   GERADO[i-1,1]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.x), n = 1L))
   GERADO[i-1,2]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.y), n = 1L))
-  GERADO[i-1,3]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.z), n = 1L))
-  GERADO[i-1,4]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.w), n = 1L))
-  GERADO[i-1,5]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR), n = 1L))  
+  GERADO[i-1,3]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.3), n = 1L))
+  GERADO[i-1,4]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.4), n = 1L))
+  GERADO[i-1,5]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.5), n = 1L))
+  GERADO[i-1,6]<-as.numeric(tail(subset(serie, serie$VALDATA >= datas[i-1] & serie$VALDATA < datas[i] ,select=VALVALOR.6), n = 1L))
 }
 
 ## 6) COLOCANDO NO FORMATO NOVO (PLANILHA GENERICA)
@@ -114,12 +130,20 @@ write.xlsx(GENERICA,paste0("BMger.xls"),sheetName="Generica",row.names=F,showNA=
 #   assign(nomes,sqlQuery((odbcConnect("ipeadata",uid="",pwd="")),(paste0("SELECT ipea.vw_Valor.SERCODIGO, CAST (ipea.vw_Valor.VALDATA as NUMERIC) as VALDATA, ipea.vw_Valor.VALVALOR FROM ipea.vw_Valor WHERE (((ipea.vw_Valor.SERCODIGO)='",seroutput[i],"' and ipea.vw_Valor.VALVALOR IS NOT NULL)) order by VALDATA;"))))
 #   odbcCloseAll()
 # }
-# verif<-merge(verif1,verif2,by="VALDATA",all=T)
-# verif<-merge(verif,verif3,by="VALDATA",all=T)
-# verif<-merge(verif,verif4,by="VALDATA",all=T,suffixes = c(".z",".w"))
-# verif<-merge(verif,verif5,by="VALDATA",all=T,suffixes = c(".a",".b"))
-# verif<-verif[,seq(1,dim(verif)[2],length.out=length(seroutput)+1)]
+# verif <- NULL
+# if (length(serinput)==1){verif <- merge(verif1,verif1,by="VALDATA",all=T)}
+# if ((length(serinput)>1) & (length(serinput)<=2)){verif <- merge(verif1,verif2,by="VALDATA",all=T)}
+# if (length(serinput)>2)
+# {
+#   verif <- merge(verif1,verif2,by="VALDATA",all=T)
+#   for (i in 3:length(serinput))
+#   {
+#     verif <- merge(verif,get(paste0("verif",i)),by="VALDATA",all=T)
+#     names(verif)[(2*i):((2*i)+1)] <- paste0(c("SERCODIGO.","VALVALOR."),i)
+#   }
+# }
 # verif$VALDATA<-as.Date(verif$VALDATA, origin = "1900-01-01")
+# verif <- verif[,seq(1,dim(verif)[2],2)]
 # names(verif)<-c("VALDATA",seroutput)
 # ############ (CTRL+L)
 # head(GENERICA)
