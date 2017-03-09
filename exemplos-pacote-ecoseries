@@ -1,0 +1,67 @@
+##==============================================================================
+## INSTALL AND LOAD PACKAGES
+##==============================================================================
+if (!require("install.load")) install.packages("install.load")
+install.load::install_load("ecoseries", "rjson", "XML", "tibble", "magrittr")
+
+require(ecoseries)
+require(rjson)
+require(XML)
+require(tibble)
+require(magrittr)
+
+##########################################
+####### Exemplos pacote ecoseries ########
+##########################################
+
+###########
+## SIDRA ##
+###########
+
+# Série do IPCA - Percentual no mês (Percentual) 
+
+#Com todas variáveis
+IPCA=series_sidra(x = c(1419), from = 201201, to = 201701, territory = "brazil",variable = "allxp")
+ipca=data.frame(IPCA[[1]])
+
+#Com variável 63
+IPCA_63=series_sidra(x = c(1419), from = 201201, to = 201701, territory = "brazil",variable = 63)
+ipca_63=data.frame(IPCA_63[[1]])
+
+IPCA_66=series_sidra(x = c(1419), from = 201201, to = 201701, territory = "brazil",variable = 66)
+ipca_66=data.frame(IPCA_66[[1]])
+
+IPCA_69=series_sidra(x = c(1419), from = 201201, to = 201701, territory = "brazil",variable = 69)
+ipca_69=data.frame(IPCA_69[[1]])
+
+IPCA_15=series_sidra(x = c(1705), from = 201201, to = 201701, territory = "brazil")
+IPCA_15=data.frame(IPCA_15[[1]])
+
+###########
+## BACEN ##
+###########
+
+#Série da Dívida líquida do setor público harmonizada - Total - R$ milhões)
+
+BACEN=series_bacen(x=12508, from = "01/01/1990", to = "01/01/2016")
+bacen=data.frame(BACEN[[1]])
+
+###############
+## IPEA DATA ##
+###############
+
+
+### Ipeadata #
+### </title><link rel="stylesheet" type="text/css" href="css/estilos.css" />
+### <script type="text/javascript" src="jscripts/ipeanet.js" charset="iso-8859-1">
+  
+ipea=series_ipeadata(394221910, periodicity = c("Y"))
+S_ipea=data.frame(ipea[[1]])
+
+url_ipea="http://www.ipeadata.gov.br/ExibeSerie.aspx?serid=394221910"
+ipea.table = readHTMLTable(url_ipea, header=T, which=3,stringsAsFactors=F, encoding = "UTF8")
+
+ipea.table3 = htmlParse(url_ipea, encoding = "UTF8")
+
+url_ipea2="http://www.ipeadata.gov.br/ExibeSerie.aspx?serid=40940"
+ipea.table2 = readHTMLTable(url_ipea2, header=T, which=3,stringsAsFactors=F)
