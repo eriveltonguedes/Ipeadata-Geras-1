@@ -1,0 +1,2 @@
+load("/Users/jony/Documents/Universidade Federal Fluminense/Minicursos e Palestras/IPEA/Introducao a Analise de Dados usando R/Aula 02/Base modificada.rds")
+ls()
